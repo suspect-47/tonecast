@@ -1,0 +1,31 @@
+{
+  "name": "tonecast",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "npm run build:server && npm run build:extension",
+    "build:server": "tsc -p backend/tsconfig.json",
+    "build:extension": "node scripts/build-extension.mjs",
+    "check": "tsc -p backend/tsconfig.json --noEmit && tsc -p extension/tsconfig.json --noEmit",
+    "dev": "concurrently \"npm:dev:server\" \"npm:dev:extension\"",
+    "dev:server": "tsx watch backend/src/index.ts",
+    "dev:extension": "node --watch scripts/build-extension.mjs"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.29",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.15",
+    "concurrently": "^9.2.0",
+    "esbuild": "^0.25.6",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

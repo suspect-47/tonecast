@@ -1,0 +1,126 @@
+.tonecast-panel {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: grid;
+  gap: 10px;
+  margin: 10px 12px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background:
+    radial-gradient(circle at top left, rgba(255, 199, 95, 0.35), transparent 40%),
+    linear-gradient(135deg, rgba(255, 248, 235, 0.96), rgba(255, 255, 255, 0.95));
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+.tonecast-panel[data-tonecast-busy=""] {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.tonecast-heading {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7c2d12;
+}
+
+.tonecast-select,
+.tonecast-range,
+.tonecast-button {
+  width: 100%;
+}
+
+.tonecast-select {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(124, 45, 18, 0.18);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.tonecast-intensity {
+  font-size: 12px;
+  font-weight: 600;
+  color: #78350f;
+}
+
+.tonecast-range {
+  accent-color: #ea580c;
+}
+
+.tonecast-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tonecast-button {
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ea580c, #ef4444);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tonecast-button:hover {
+  filter: brightness(1.05);
+}
+
+.tonecast-commentary {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #7c2d12;
+}
+
+.tonecast-panel[data-tonecast-animation="glow"] {
+  box-shadow: 0 0 0 2px rgba(251, 146, 60, 0.3), 0 16px 40px rgba(249, 115, 22, 0.2);
+}
+
+.tonecast-panel[data-tonecast-animation="shake"] {
+  animation: tonecast-shake 0.28s linear 2;
+}
+
+.tonecast-panel[data-tonecast-animation="smoke"] {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(191, 219, 254, 0.28), transparent 30%),
+    linear-gradient(135deg, rgba(245, 243, 255, 0.98), rgba(255, 255, 255, 0.96));
+}
+
+.tonecast-panel[data-tonecast-animation="wave"] {
+  background:
+    radial-gradient(circle at 80% 25%, rgba(125, 211, 252, 0.32), transparent 25%),
+    linear-gradient(135deg, rgba(239, 246, 255, 0.98), rgba(255, 255, 255, 0.96));
+}
+
+.tonecast-panel[data-tonecast-animation="pulse"] {
+  animation: tonecast-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes tonecast-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes tonecast-pulse {
+  0%,
+  100% {
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
+  }
+  50% {
+    box-shadow: 0 18px 40px rgba(234, 88, 12, 0.2);
+  }
+}
