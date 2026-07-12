@@ -37,6 +37,13 @@
       icon: "$",
       color: "#63cfe3",
     },
+    rejections: {
+      label: "Plot Twists",
+      shortLabel: "Plot Twists",
+      description: "Job and investor passes, bundled gently.",
+      icon: "♪",
+      color: "#ff9fc9",
+    },
     fyi: {
       label: "FYI",
       shortLabel: "FYI",
@@ -44,6 +51,16 @@
       icon: "☀",
       color: "#ffd55c",
     },
+  };
+
+  const replyStyleProfile = {
+    label: "Your usual direct, warm style",
+    greeting: "Hey",
+    length: "brief-to-medium",
+    warmth: "warm",
+    directness: "high",
+    emoji: "rare",
+    signoff: "usually omitted in quick replies",
   };
 
   const originalMessages = [
@@ -56,6 +73,8 @@
       time: "9:42 AM",
       unread: true,
       category: "needs",
+      sceneType: "boss_deadline",
+      relationship: "boss",
       character: "Blaze",
       kind: "fox",
       prop: "📣",
@@ -98,6 +117,7 @@
       time: "8:51 AM",
       unread: true,
       category: "quick",
+      sceneType: "freelance_project",
       character: "Zip",
       kind: "frog",
       prop: "⚡",
@@ -119,6 +139,7 @@
       time: "8:24 AM",
       unread: false,
       category: "quick",
+      sceneType: "weekend_dinner",
       character: "Pippa",
       kind: "pigeon",
       prop: "💌",
@@ -130,6 +151,31 @@
       reason: "It is personal, easy to answer, and probably delightful.",
       primary: "Say yes",
       voice: { index: 1, pitch: 1.12, rate: 0.9 },
+    },
+    {
+      id: "zoe-rooftop",
+      sender: "Zoe Kim",
+      senderInitials: "ZK",
+      subject: "Rooftop birthday Saturday — you in?",
+      snippet: "Eight o’clock in Silver Lake. Bring a jacket and your most unserious dance move.",
+      time: "8:18 AM",
+      unread: true,
+      category: "plans",
+      sceneType: "weekend_party",
+      reason: "It is an explicit weekend party invitation asking for an RSVP.",
+    },
+    {
+      id: "ari-dune",
+      sender: "Ari Shah",
+      senderInitials: "AS",
+      subject: "Dune at IMAX Sunday?",
+      snippet: "There is a 6:20 showing. I can grab the middle seats if you are down.",
+      time: "8:10 AM",
+      unread: true,
+      category: "plans",
+      sceneType: "weekend_movie",
+      movieGenre: "sci-fi",
+      reason: "It names a movie, format, day, time, and asks whether you want a seat.",
     },
     {
       id: "marcus-jam",
@@ -151,6 +197,27 @@
       reason: "It changes the time of an upcoming calendar event.",
       primary: "View calendar",
       voice: { index: 4, pitch: 0.86, rate: 0.88 },
+    },
+    {
+      id: "rejection-choir-demo",
+      sender: "The No-Thanks Chorus",
+      senderInitials: "♪",
+      subject: "3 application plot twists, bundled gently",
+      snippet: "Two job applications and one early-stage investor pass arrived today.",
+      time: "7:58 AM",
+      unread: true,
+      category: "rejections",
+      sceneType: "job_rejection_bundle",
+      bundleCount: 3,
+      bundleBreakdown: "2 job applications · 1 investor pass",
+      reason: "Three visible messages use explicit pass or not-moving-forward language, so the demo groups them instead of making you relive each one.",
+      replyNeeded: false,
+      nextAction: "No reply needed. Their loss; the next door is already making suspiciously promising noises.",
+      chorusParts: [
+        { personaId: "rejection_chorus", text: "Three applications returned polite no-thank-yous." },
+        { personaId: "warm_coworker", text: "Annoying. Deep breath." },
+        { personaId: "freelance_frog", text: "The hallway still has more doors. Next door!" },
+      ],
     },
     {
       id: "cloudcart-receipt",
@@ -239,6 +306,14 @@
   };
 
   const voicePersonas = {
+    grandiose_host: {
+      label: "Roaming Reporter · grandiose & wry",
+      shortLabel: "Roaming Reporter",
+      description: "An original pompous correspondent voice for deadline theatre.",
+      ...characterSkins.needs[0],
+      character: "Dispatch Fox",
+      prop: "🎙️",
+    },
     deadline_fox: {
       label: "Deadline Fox · dramatic boss energy",
       shortLabel: "Deadline Fox",
@@ -263,6 +338,34 @@
       shortLabel: "Freelance Frog",
       description: "Fast, optimistic project energy.",
       ...characterSkins.quick[0],
+    },
+    rejection_chorus: {
+      label: "Velvet Nope Choir · gentle chaos",
+      shortLabel: "Velvet Nope Choir",
+      description: "A sympathetic call-and-response for grouped passes.",
+      character: "The Nope Choir",
+      kind: "chorus",
+      prop: "♪",
+      body: "#df8ed0",
+      belly: "#ffe2f5",
+      accent: "#ffd55c",
+      voice: { index: 5, pitch: 1.14, rate: 0.96 },
+    },
+    party_hype: {
+      label: "Disco Pigeon · party radio",
+      shortLabel: "Disco Pigeon",
+      description: "Upbeat weekend energy without inventing plan details.",
+      ...characterSkins.quick[1],
+      character: "Disco Pigeon",
+      prop: "🪩",
+    },
+    cinema_narrator: {
+      label: "Projector Owl · cinematic",
+      shortLabel: "Projector Owl",
+      description: "A genre-aware cinema usher for movie plans.",
+      ...characterSkins.plans[0],
+      character: "Projector Owl",
+      prop: "🍿",
     },
     finance_bot: {
       label: "Finance Bot · precise",
@@ -292,10 +395,11 @@
   };
 
   const defaultPersonaByCategory = {
-    needs: "deadline_fox",
+    needs: "warm_coworker",
     quick: "warm_coworker",
     plans: "polished_client",
     money: "finance_bot",
+    rejections: "rejection_chorus",
     fyi: "newsletter_noodle",
   };
 
@@ -317,6 +421,10 @@
     activeAudio: null,
     activeAudioUrl: null,
     activeVoiceRequest: null,
+    activeSpeechPart: null,
+    voiceLoadingId: null,
+    replyVisibleIds: new Set(),
+    replyVariantIndexes: new Map(),
     source: embedded ? "loading" : "sample",
     coachVisible: true,
     isOpen: false,
@@ -363,6 +471,12 @@
     voiceButtonLabel: document.getElementById("voiceButtonLabel"),
     voiceCaption: document.getElementById("voiceCaption"),
     voiceServiceStatus: document.getElementById("voiceServiceStatus"),
+    replyReveal: document.getElementById("replyReveal"),
+    replyRevealLabel: document.getElementById("replyRevealLabel"),
+    replyTone: document.getElementById("replyTone"),
+    replyText: document.getElementById("replyText"),
+    copyReplyButton: document.getElementById("copyReplyButton"),
+    tryReplyToneButton: document.getElementById("tryReplyToneButton"),
     personaControlLabel: document.getElementById("personaControlLabel"),
     personaSelect: document.getElementById("personaSelect"),
     detailReason: document.getElementById("detailReason"),
@@ -521,15 +635,16 @@
         const selected = message.id === state.selectedId;
         return `
           <button
-            class="mail-character ${selected ? "is-selected" : ""}"
+            class="mail-character ${selected ? "is-selected" : ""} ${message.bundleCount ? "is-bundle" : ""}"
             type="button"
             data-message-id="${message.id}"
             style="--body:${message.body};--belly:${message.belly};--accent:${message.accent};--order:${order}"
-            aria-label="${message.unread ? "Unread" : "Read"} email from ${escapeHtml(message.sender)}: ${escapeHtml(message.subject)}"
+            aria-label="Select and play recap for ${message.unread ? "unread" : "read"} email from ${escapeHtml(message.sender)}: ${escapeHtml(message.subject)}"
             aria-pressed="${selected}"
             tabindex="${selected ? "0" : "-1"}"
           >
             <span class="character-art toon--${message.kind}" aria-hidden="true">
+              ${message.bundleCount ? `<b class="bundle-badge">${message.bundleCount}</b><i class="bundle-echo one"></i><i class="bundle-echo two"></i>` : ""}
               <span class="character-shadow"></span>
               <span class="toon-tail"></span>
               <span class="toon-ear left"></span><span class="toon-ear right"></span>
@@ -625,13 +740,14 @@
     elements.doneButton.disabled = handled;
     elements.doneButton.innerHTML = handled ? "<span>✓</span> Hidden here" : "<span>✓</span> Hide from parade";
     const usingStudioVoice = state.voiceBackend === "online";
+    const loadingVoice = state.voiceLoadingId === message.id;
     elements.voiceButtonLabel.textContent = state.speakingId === message.id
-      ? "Stop character voice"
+      ? loadingVoice ? "Cooking up the voice…" : "Stop character voice"
       : usingStudioVoice ? "Play ElevenLabs voice" : "Play local character voice";
     elements.voiceButton.setAttribute("aria-pressed", String(state.speakingId === message.id));
     const remotePersona = state.remotePersonas[message.personaId];
     elements.voiceCaption.textContent = state.speakingId === message.id
-      ? message.spoken
+      ? state.activeSpeechPart || message.spoken
       : `${voicePersonas[message.personaId].shortLabel}${remotePersona?.voiceName ? ` · ${remotePersona.voiceName}` : ""}`;
     elements.voiceButton.classList.toggle("is-speaking", state.speakingId === message.id);
     elements.voiceServiceStatus.textContent = usingStudioVoice ? "11LABS" : state.voiceBackend === "checking" ? "CONNECTING" : "LOCAL";
@@ -640,9 +756,18 @@
     elements.trustCopy.textContent = usingStudioVoice
       ? "When you press Play, only this displayed one-line preview is sent through the local bridge to ElevenLabs."
       : "Gmail won’t change · Browser voice stays on this device";
-    const canOpenRealMessage = state.source === "visible-gmail";
+    const replyVisible = state.replyVisibleIds.has(message.id);
+    const replyVariant = currentReplyVariant(message);
+    elements.replyReveal.hidden = !replyVisible;
+    elements.replyReveal.classList.toggle("is-no-reply", message.replyNeeded === false);
+    elements.replyRevealLabel.textContent = message.replyNeeded === false ? "NO REPLY NEEDED" : "QUICK REPLY · UNLOCKED";
+    elements.replyTone.textContent = message.replyNeeded === false ? "A gentler next step" : replyStyleProfile.label;
+    elements.replyText.textContent = message.replyNeeded === false ? message.nextAction : replyVariant;
+    elements.copyReplyButton.hidden = message.replyNeeded === false;
+    elements.tryReplyToneButton.hidden = message.replyNeeded === false;
+    const canOpenRealMessage = state.source === "visible-gmail" && !message.bundleCount;
     elements.openButton.disabled = !canOpenRealMessage;
-    elements.openButton.textContent = canOpenRealMessage ? "Open in Gmail ↗" : "Sample message";
+    elements.openButton.textContent = canOpenRealMessage ? "Open in Gmail ↗" : message.bundleCount ? "Grouped queue" : "Sample message";
   }
 
   function previewPrimaryLabel(category) {
@@ -651,6 +776,7 @@
       quick: "Preview quick reply",
       plans: "Preview calendar note",
       money: "Preview filing idea",
+      rejections: "Hear the gentle chorus",
       fyi: "Preview save-for-later",
     }[category] || "Preview next step";
   }

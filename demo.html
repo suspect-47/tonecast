@@ -132,7 +132,7 @@
             <div class="mail-chute" aria-hidden="true"><span>NEW MAIL</span><i></i></div>
             <div class="stage-coach" id="stageCoach">
               <span class="coach-step" aria-hidden="true">1</span>
-              <p><strong>Each character is one visible email.</strong><small>Start with the one waving, then open it in Gmail.</small></p>
+              <p><strong>Tap a character: it speaks, then reveals your reply.</strong><small>Grouped plot twists sing one gentle chorus instead of piling on.</small></p>
               <button id="dismissCoachButton" type="button">Got it</button>
               <i aria-hidden="true"></i>
             </div>
@@ -168,6 +168,19 @@
             <b class="voice-service-status" id="voiceServiceStatus">LOCAL</b>
             <span class="voice-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
           </button>
+
+          <section class="reply-reveal" id="replyReveal" aria-live="polite" hidden>
+            <div class="reply-reveal-topline">
+              <span id="replyRevealLabel">QUICK REPLY · UNLOCKED</span>
+              <b id="replyTone">Your usual direct, warm style</b>
+            </div>
+            <p id="replyText"></p>
+            <div class="reply-reveal-actions">
+              <button id="copyReplyButton" type="button">Copy draft</button>
+              <button id="tryReplyToneButton" type="button">Try another tone</button>
+            </div>
+            <small>Preview only. Nothing is sent.</small>
+          </section>
 
           <label class="persona-control" for="personaSelect">
             <span id="personaControlLabel">Cast this sender as</span>
@@ -213,6 +226,9 @@
         </button>
         <button class="station money-station" data-category="money" type="button" aria-pressed="false">
           <span class="station-icon">$</span><span><strong>Money</strong><small>Receipts & bills</small></span><b id="count-money">1</b>
+        </button>
+        <button class="station rejections-station" data-category="rejections" type="button" aria-pressed="false">
+          <span class="station-icon">♪</span><span><strong>Plot Twists</strong><small>Rejections, gently grouped</small></span><b id="count-rejections">1</b>
         </button>
         <button class="station fyi-station" data-category="fyi" type="button" aria-pressed="false">
           <span class="station-icon">☀</span><span><strong>FYI</strong><small>Good news & reads</small></span><b id="count-fyi">2</b>
