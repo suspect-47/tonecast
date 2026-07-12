@@ -876,6 +876,8 @@
     });
     elements.soundButton.addEventListener("click", toggleSound);
     elements.voiceButton.addEventListener("click", playSelectedVoice);
+    elements.copyReplyButton.addEventListener("click", copyQuickReply);
+    elements.tryReplyToneButton.addEventListener("click", tryAnotherReplyTone);
     elements.doneButton.addEventListener("click", markSelectedDone);
     elements.primaryAction.addEventListener("click", runPrimaryAction);
     elements.snoozeButton.addEventListener("click", snoozeSelected);
@@ -886,7 +888,16 @@
     elements.characterTrack.addEventListener("click", (event) => {
       const character = event.target.closest(".mail-character");
       if (!character) return;
+      const wasSpeaking = state.speakingId === character.dataset.messageId;
       selectMessage(character.dataset.messageId, true);
+      if (wasSpeaking) return;
+      if (!state.soundEnabled) {
+        showToast("Voices are off. The character is selected without sending text for audio.");
+        return;
+      }
+      window.setTimeout(() => {
+        if (state.selectedId === character.dataset.messageId) void playSelectedVoice();
+      }, reducedMotion ? 0 : 120);
     });
 
     document.querySelector(".station-dock").addEventListener("click", (event) => {
@@ -1196,14 +1207,50 @@
   function runPrimaryAction() {
     const message = selectedMessage();
     if (!message || state.handledIds.has(message.id)) return;
+    if (message.category === "rejections") {
+      if (state.speakingId !== message.id) void playSelectedVoice();
+      return;
+    }
     const actions = {
       needs: "Preview idea: acknowledge the request and confirm when you can respond.",
       quick: "Preview idea: answer the one visible question in a short sentence.",
       plans: "Preview idea: double-check the date and add it to your calendar.",
       money: "Preview idea: keep this receipt with your other purchase records.",
+      rejections: "No reply needed. The chorus has bundled these gently.",
       fyi: "Preview idea: save this for a calmer reading moment.",
     };
     showToast(actions[message.category]);
+  }
+
+  function currentReplyVariant(message) {
+    const variants = Array.isArray(message.replyVariants) && message.replyVariants.length
+      ? message.replyVariants
+      : buildReplyVariants(message);
+    const index = state.replyVariantIndexes.get(message.id) || 0;
+    return variants[index % variants.length];
+  }
+
+  function tryAnotherReplyTone() {
+    const message = selectedMessage();
+    const variants = Array.isArray(message.replyVariants) && message.replyVariants.length
+      ? message.replyVariants
+      : buildReplyVariants(message);
+    const nextIndex = ((state.replyVariantIndexes.get(message.id) || 0) + 1) % variants.length;
+    state.replyVariantIndexes.set(message.id, nextIndex);
+    renderDetail();
+    showToast(nextIndex === 0 ? "Back to your usual direct tone." : "Trying a slightly more playful version.");
+  }
+
+  async function copyQuickReply() {
+    const message = selectedMessage();
+    if (!message || message.replyNeeded === false) return;
+    const draft = currentReplyVariant(message);
+    try {
+      await navigator.clipboard.writeText(draft);
+      showToast("Draft copied. Nothing was sent.");
+    } catch {
+      showToast(`Draft ready to copy: ${draft}`);
+    }
   }
 
   function openOriginal() {
