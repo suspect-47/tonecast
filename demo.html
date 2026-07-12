@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Inbox Parade</title>
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <section class="fake-gmail" id="fakeGmail" aria-label="Sample plain inbox">
+      <header class="fake-topbar">
+        <div class="fake-menu" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="fake-brand"><span class="fake-envelope">M</span><strong>Mail</strong></div>
+        <div class="fake-search">
+          <span aria-hidden="true">⌕</span>
+          <span>Search mail</span>
+        </div>
+        <div class="fake-tools" aria-hidden="true"><span>?</span><span>⚙</span><b>PA</b></div>
+      </header>
+
+      <div class="fake-shell">
+        <aside class="fake-sidebar">
+          <button class="fake-compose" type="button"><span>＋</span> Compose</button>
+          <nav aria-label="Sample mailbox folders">
+            <a class="active" href="#fakeInbox"><span>▣</span> Inbox <b>6</b></a>
+            <a href="#fakeInbox"><span>☆</span> Starred</a>
+            <a href="#fakeInbox"><span>◷</span> Snoozed</a>
+            <a href="#fakeInbox"><span>➤</span> Sent</a>
+            <a href="#fakeInbox"><span>▤</span> Drafts <b>2</b></a>
+          </nav>
+        </aside>
+
+        <main class="fake-inbox" id="fakeInbox">
+          <div class="fake-inbox-tools" aria-hidden="true">
+            <span>□</span><span>↻</span><span>⋮</span><small>1–8 of 8</small><span>‹</span><span>›</span>
+          </div>
+          <div class="fake-tabs">
+            <button class="active" type="button">Primary</button>
+            <button type="button">Promotions</button>
+            <button type="button">Updates</button>
+          </div>
+          <div class="fake-message-list" id="fakeMessageList"></div>
+        </main>
+      </div>
+
+      <div class="launch-nudge">
+        <div class="launch-mascot" aria-hidden="true">
+          <span class="launch-ear one"></span><span class="launch-ear two"></span>
+          <span class="launch-face"><i></i><i></i><b></b></span>
+        </div>
+        <div>
+          <small>Inbox looking a little beige?</small>
+          <strong>Wake up the mailroom.</strong>
+        </div>
+        <button class="launch-button" id="launchButton" type="button">
+          <span>✦</span> Start the Parade
+        </button>
+      </div>
+    </section>
+
+    <div class="pixel-curtain" id="pixelCurtain" aria-hidden="true">
+      <div class="pixel-grid" id="pixelGrid"></div>
+    </div>
+
+    <main class="parade-app" id="paradeApp" aria-hidden="true">
+      <div class="paper-noise" aria-hidden="true"></div>
+      <div class="sky-shape sky-shape-one" aria-hidden="true"></div>
+      <div class="sky-shape sky-shape-two" aria-hidden="true"></div>
+      <div class="cloud cloud-one" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="cloud cloud-two" aria-hidden="true"><i></i><i></i><i></i></div>
+
+      <header class="parade-topbar">
+        <div class="parade-brand">
+          <span class="brand-stamp" aria-hidden="true">
+            <span class="brand-flap"></span><span class="brand-eyes"></span>
+          </span>
+          <span>
+            <strong>INBOX PARADE!</strong>
+            <small>your daily mailroom adventure</small>
+          </span>
+        </div>
+
+        <div class="arrival-pill">
+          <span class="arrival-dot"></span>
+          <strong id="arrivalCount">8 sample messages</strong>
+          <span id="todayLabel">today</span>
+          <b class="source-mode" id="sourceMode">SAMPLE</b>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="icon-button" id="replayButton" type="button" aria-label="Replay the character entrance" title="Replay entrance">
+            <span aria-hidden="true">↻</span>
+          </button>
+          <button class="sound-button" id="soundButton" type="button" aria-pressed="true">
+            <span class="sound-icon" aria-hidden="true">♪</span>
+            <span class="sound-label">Voices on</span>
+          </button>
+          <button class="back-button" id="backButton" type="button">
+            <span aria-hidden="true">←</span> Back to Gmail
+          </button>
+        </div>
+      </header>
+
+      <div class="parade-content">
+        <section class="parade-stage" aria-labelledby="stageTitle">
+          <div class="pennants" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+
+          <div class="stage-heading">
+            <div>
+              <span class="eyebrow"><i></i> TODAY'S LINEUP</span>
+              <h1 id="stageTitle" tabindex="-1">The mail has entered the building.</h1>
+              <p id="stageSubtitle">Eight tiny arrivals, sorted by what deserves your attention.</p>
+            </div>
+            <div class="progress-card" id="progressCard" role="progressbar" aria-label="Parade visibility progress" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" aria-valuetext="0 of 8 hidden from the parade">
+              <div class="progress-copy"><span>PARADE PROGRESS</span><strong id="progressText">0 of 8 hidden</strong></div>
+              <div class="progress-track"><i id="progressFill"></i></div>
+            </div>
+          </div>
+
+          <div class="filter-banner" id="filterBanner">
+            <span class="filter-banner-icon" id="filterIcon">✦</span>
+            <span><strong id="filterTitle">All arrivals</strong><small id="filterDescription">Everybody into the parade!</small></span>
+            <button id="resetDemoButton" type="button">Show hidden</button>
+          </div>
+
+          <div class="character-scene">
+            <div class="scene-sun" aria-hidden="true"><span></span></div>
+            <div class="mail-chute" aria-hidden="true"><span>NEW MAIL</span><i></i></div>
+            <div class="stage-coach" id="stageCoach">
+              <span class="coach-step" aria-hidden="true">1</span>
+              <p><strong>Each character is one visible email.</strong><small>Start with the one waving, then open it in Gmail.</small></p>
+              <button id="dismissCoachButton" type="button">Got it</button>
+              <i aria-hidden="true"></i>
+            </div>
+            <div class="character-track" id="characterTrack" role="group" aria-label="Today's email characters"></div>
+            <div class="parade-road" aria-hidden="true">
+              <span class="road-line"></span>
+              <i class="road-spark one">✦</i><i class="road-spark two">✦</i><i class="road-spark three">✦</i>
+            </div>
+          </div>
+        </section>
+
+        <aside class="detail-panel" id="detailPanel" aria-labelledby="detailSubject">
+          <div class="detail-accent" id="detailAccent"></div>
+          <div class="detail-topline">
+            <span class="priority-chip" id="detailCategory"></span>
+            <span class="detail-time" id="detailTime"></span>
+          </div>
+          <div class="sender-row">
+            <span class="sender-avatar" id="senderAvatar" aria-hidden="true"></span>
+            <span><small>FROM</small><strong id="detailSender"></strong></span>
+            <i class="unread-dot" id="detailUnread" aria-hidden="true"></i>
+          </div>
+          <h2 id="detailSubject"></h2>
+          <div class="speech-bubble">
+            <span class="speech-name" id="characterName"></span>
+            <p id="detailSummary"></p>
+            <span class="speech-tail"></span>
+          </div>
+
+          <button class="voice-button" id="voiceButton" type="button" aria-pressed="false">
+            <span class="voice-play" aria-hidden="true">▶</span>
+            <span><strong id="voiceButtonLabel">Play character voice</strong><small id="voiceCaption">Hear the quick subject preview</small></span>
+            <b class="voice-service-status" id="voiceServiceStatus">LOCAL</b>
+            <span class="voice-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          </button>
+
+          <label class="persona-control" for="personaSelect">
+            <span id="personaControlLabel">Cast this sender as</span>
+            <select id="personaSelect"></select>
+            <small>Remembered locally for this sender</small>
+          </label>
+
+          <div class="sort-reason">
+            <span aria-hidden="true">↳</span>
+            <p><strong>WHY IT'S HERE</strong><span id="detailReason"></span></p>
+          </div>
+
+          <label class="move-control" for="moveSelect">
+            <span>Move this character</span>
+            <select id="moveSelect"></select>
+          </label>
+
+          <div class="trust-strip"><span aria-hidden="true">◇</span><strong id="trustTitle">Read-only parade</strong><small id="trustCopy">Gmail won’t change · Nothing leaves this tab</small></div>
+
+          <div class="detail-actions">
+            <button class="primary-action" id="primaryAction" type="button"></button>
+            <button class="secondary-action" id="doneButton" type="button"><span>✓</span> Hide from parade</button>
+            <button class="text-action" id="snoozeButton" type="button">Move to FYI</button>
+            <button class="text-action" id="openButton" type="button">Open in Gmail ↗</button>
+          </div>
+          <p class="demo-note"><span>PREVIEW</span> Sorting and hidden state live only in this temporary parade.</p>
+        </aside>
+      </div>
+
+      <nav class="station-dock" aria-label="Filter by mail station">
+        <span class="station-dock-label">FILTER VISIBLE CHARACTERS</span>
+        <button class="station all-station is-active" data-category="all" type="button" aria-pressed="true">
+          <span class="station-icon">✦</span><span><strong>All Shown</strong><small>The visible parade</small></span><b id="count-all">8</b>
+        </button>
+        <button class="station needs-station" data-category="needs" type="button" aria-pressed="false">
+          <span class="station-icon">!</span><span><strong>Needs You</strong><small>Questions & approvals</small></span><b id="count-needs">2</b>
+        </button>
+        <button class="station quick-station" data-category="quick" type="button" aria-pressed="false">
+          <span class="station-icon">⚡</span><span><strong>Quick Wins</strong><small>Two-minute replies</small></span><b id="count-quick">2</b>
+        </button>
+        <button class="station plans-station" data-category="plans" type="button" aria-pressed="false">
+          <span class="station-icon">▦</span><span><strong>Plans</strong><small>Dates & meetings</small></span><b id="count-plans">1</b>
+        </button>
+        <button class="station money-station" data-category="money" type="button" aria-pressed="false">
+          <span class="station-icon">$</span><span><strong>Money</strong><small>Receipts & bills</small></span><b id="count-money">1</b>
+        </button>
+        <button class="station fyi-station" data-category="fyi" type="button" aria-pressed="false">
+          <span class="station-icon">☀</span><span><strong>FYI</strong><small>Good news & reads</small></span><b id="count-fyi">2</b>
+        </button>
+      </nav>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+    <div class="sr-only" id="liveRegion" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

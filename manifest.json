@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Inbox Parade",
+  "version": "0.1.0",
+  "description": "Turn a Gmail tab into a playful, interactive inbox parade.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:8787/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' http://127.0.0.1:8787"
+  },
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "action": {
+    "default_title": "Toggle Inbox Parade"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Toggle Inbox Parade on Gmail"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "demo.html",
+        "styles.css",
+        "app.js"
+      ],
+      "matches": [
+        "https://mail.google.com/*"
+      ]
+    }
+  ]
+}
