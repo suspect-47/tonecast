@@ -48,3 +48,17 @@ Then:
 3. Start composing an email and use the ToneCast controls.
 
 The backend runs on `http://localhost:8787` by default.
+
+## Landing page
+
+ToneCast also includes a responsive marketing page at the repository root. Run it locally with:
+
+```bash
+npm run dev:site
+```
+
+Build an OpenNext-compatible deployment bundle with:
+
+```bash
+npm run build:site
+```
