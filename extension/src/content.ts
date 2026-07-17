@@ -108,14 +108,22 @@ function mountPanel(composeView: ComposeView) {
 
   // Mount into a compose status bar: a non-editable region BELOW the body,
   // so the text input stays on top and native <select> dropdowns work.
-  const statusBar = composeView.addStatusBar({ height: 205 });
+  const COLLAPSED_H = 52;
+  const EXPANDED_H = 215;
+  const statusBar = composeView.addStatusBar({ height: COLLAPSED_H });
 
   const panel = document.createElement("section");
   panel.className = PANEL_CLASS;
 
-  const title = document.createElement("div");
+  const header = document.createElement("div");
+  header.className = "tonecast-header";
+  const title = document.createElement("span");
   title.className = "tonecast-heading";
   title.textContent = "ToneCast";
+  const caret = document.createElement("span");
+  caret.className = "tonecast-caret";
+  caret.textContent = "\u25b8";
+  header.append(title, caret);
 
   const personaSelect = makeSelect(personaOptions.map((p) => ({ value: p.id, label: p.label })));
   const genderSelect = makeSelect(voiceOptions);
@@ -228,7 +236,22 @@ function mountPanel(composeView: ComposeView) {
   });
 
   controls.append(possessButton, exorciseButton, playVoiceButton, attachVoiceButton);
-  panel.append(title, grid, controls, commentary);
+
+  const body = document.createElement("div");
+  body.className = "tonecast-body";
+  body.append(grid, controls, commentary);
+
+  let expanded = false;
+  function setExpanded(next: boolean) {
+    expanded = next;
+    body.style.display = expanded ? "grid" : "none";
+    caret.textContent = expanded ? "\u25be" : "\u25b8";
+    statusBar.setHeight(expanded ? EXPANDED_H : COLLAPSED_H);
+  }
+  header.addEventListener("click", () => setExpanded(!expanded));
+  setExpanded(false); // start collapsed so the email body keeps full height
+
+  panel.append(header, body);
   statusBar.el.append(panel);
 
   async function possessDraft() {
