@@ -72,3 +72,13 @@ Movie Trailer, Furious Chef, Ancient Wizard, Pirate Captain, Sports Commentator,
 
 ### Voice notes
 The extension can attach a **voice note** of the message to the email. A "Voice of" selector chooses whether to voice the **original draft** or the **possessed version**. Attach attempts a Gmail drag-drop and always saves the MP3 to Downloads as a fallback.
+
+### Reliable Gmail attach (InboxSDK)
+The extension uses [InboxSDK](https://www.inboxsdk.com/) for a stable Gmail compose lifecycle and reliable attachment via `composeView.attachFiles()`.
+
+Setup:
+1. Register a free app id at https://www.inboxsdk.com/register and set `INBOXSDK_APP_ID` in `extension/src/content.ts`.
+2. `npm run build:extension` — bundles InboxSDK and copies `pageWorld.js` into `extension/dist`.
+3. Load `extension/dist` unpacked in Chrome.
+
+MV3 note: `pageWorld.js` ships as a web-accessible resource and is injected into the page's MAIN world by the background service worker (on the `inboxsdk__injectPageWorld` message), which needs the `scripting` permission.

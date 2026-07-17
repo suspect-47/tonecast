@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "description": "Possessed Gmail drafts with personas, theatrics, and voice playback.",
   "permissions": [
-    "storage"
+    "storage",
+    "scripting"
   ],
   "host_permissions": [
     "https://mail.google.com/*",
@@ -27,6 +28,16 @@
         "content.css"
       ],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "pageWorld.js"
+      ],
+      "matches": [
+        "https://mail.google.com/*"
+      ]
     }
   ]
 }
