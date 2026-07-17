@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ToneCast</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: radial-gradient(1200px 600px at 50% -10%, #2a1a3a, #0c0a12 60%); color: #ece9f5;
+    min-height: 100vh; display: flex; justify-content: center; padding: 32px 16px;
+  }
+  main { width: 100%; max-width: 640px; }
+  h1 { font-size: 28px; margin: 0 0 4px; letter-spacing: -0.5px; }
+  .sub { color: #a99fc4; margin: 0 0 24px; font-size: 14px; }
+  .card { background: #16121f; border: 1px solid #2c2440; border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+  label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.6px; color: #9a8fc0; margin-bottom: 6px; }
+  textarea, select { width: 100%; background: #0f0c17; color: #ece9f5; border: 1px solid #35294f; border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+  textarea { min-height: 110px; resize: vertical; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+  .row > div { flex: 1; min-width: 180px; }
+  input[type=range] { width: 100%; }
+  .controls { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  button {
+    flex: 1; min-width: 130px; cursor: pointer; border: none; border-radius: 10px; padding: 12px 14px;
+    font-size: 14px; font-weight: 600; color: #120c1e; background: linear-gradient(135deg, #c9a6ff, #8f6bff);
+  }
+  button.secondary { background: #241c36; color: #cdc3ea; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  .commentary { margin-top: 14px; font-style: italic; color: #b7aede; min-height: 20px; }
+  .desc { color: #857aa6; font-size: 12px; margin-top: 6px; }
+  footer { color: #6f6690; font-size: 12px; text-align: center; margin-top: 8px; }
+  code { background: #0f0c17; padding: 2px 6px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>ToneCast</h1>
+  <p class="sub">Possess your email drafts with a theatrical persona, then hear them performed. Keyless, powered by Sauna.</p>
+
+  <div class="card">
+    <label for="draft">Your draft</label>
+    <textarea id="draft" placeholder="Hey team, just following up on the Q3 numbers. Can we sync tomorrow?"></textarea>
+    <div class="row">
+      <div>
+        <label for="persona">Persona</label>
+        <select id="persona"></select>
+        <div class="desc" id="persona-desc"></div>
+      </div>
+      <div>
+        <label for="intensity">Intensity <span id="intensity-val">65</span></label>
+        <input id="intensity" type="range" min="0" max="100" value="65" />
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="source">Voice of</label>
+        <select id="source">
+          <option value="possessed">Possessed version</option>
+          <option value="original">Original draft</option>
+        </select>
+      </div>
+      <div>
+        <label for="voicegender">Voice</label>
+        <select id="voicegender">
+          <option value="">Persona voice</option>
+          <option value="male">Male voice</option>
+          <option value="female">Female voice</option>
+        </select>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="possess">Possess</button>
+      <button id="voice" class="secondary">Play Voice</button>
+      <button id="download" class="secondary">Download Voice</button>
+      <button id="restore" class="secondary">Restore</button>
+    </div>
+    <p class="commentary" id="commentary"></p>
+  </div>
+
+  <div class="card">
+    <label>Result</label>
+    <div id="subject" class="desc"></div>
+    <textarea id="result" readonly placeholder="Possessed draft appears here…"></textarea>
+  </div>
+
+  <footer>API: <code>/api/health</code> · <code>/api/possess</code> · <code>/api/voice</code></footer>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+let original = "";
+let personaDescriptions = {};
+
+async function loadPersonas() {
+  const res = await fetch("/api/health");
+  const data = await res.json();
+  const sel = $("persona");
+  sel.innerHTML = "";
+  for (const p of data.personas) {
+    personaDescriptions[p.id] = p.description;
+    const opt = document.createElement("option");
+    opt.value = p.id; opt.textContent = p.label;
+    sel.append(opt);
+  }
+  updateDesc();
+}
+
+function updateDesc() {
+  $("persona-desc").textContent = personaDescriptions[$("persona").value] || "";
+}
+
+function busy(state) {
+  for (const id of ["possess", "voice", "download", "restore"]) $(id).disabled = state;
+}
+
+$("intensity").addEventListener("input", () => ($("intensity-val").textContent = $("intensity").value));
+$("persona").addEventListener("change", updateDesc);
+
+$("possess").addEventListener("click", async () => {
+  const draft = $("draft").value.trim();
+  if (!draft) { $("commentary").textContent = "Write something first."; return; }
+  original = draft;
+  busy(true);
+  $("commentary").textContent = "Summoning…";
+  try {
+    const res = await fetch("/api/possess", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ draft, personaId: $("persona").value, intensity: Number($("intensity").value), preserveMeaning: true }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) { $("commentary").textContent = "Failed: " + (data.error || res.status); return; }
+    $("result").value = data.transformedDraft;
+    $("subject").textContent = "Subject: " + data.subjectSuggestion;
+    $("commentary").textContent = data.commentary;
+  } catch (e) { $("commentary").textContent = "Error: " + e.message; }
+  finally { busy(false); }
+});
+
+function getSourceText() {
+  if ($("source").value === "original") return (original || $("draft").value).trim();
+  return ($("result").value || $("draft").value).trim();
+}
+
+async function fetchVoice(text) {
+  const res = await fetch("/api/voice", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, personaId: $("persona").value, gender: $("voicegender").value }),
+  });
+  const data = await res.json();
+  if (!res.ok || data.error) { $("commentary").textContent = "Voice failed: " + (data.error || res.status); return null; }
+  return data;
+}
+
+$("voice").addEventListener("click", async () => {
+  const text = getSourceText();
+  if (!text) { $("commentary").textContent = "Nothing to perform yet."; return; }
+  busy(true);
+  $("commentary").textContent = "Performing…";
+  try {
+    const data = await fetchVoice(text);
+    if (!data) return;
+    const audio = new Audio("data:" + data.mimeType + ";base64," + data.audioBase64);
+    await audio.play();
+    $("commentary").textContent = "Now performing (" + $("source").value + ").";
+  } catch (e) { $("commentary").textContent = "Error: " + e.message; }
+  finally { busy(false); }
+});
+
+$("download").addEventListener("click", async () => {
+  const text = getSourceText();
+  if (!text) { $("commentary").textContent = "Nothing to voice yet."; return; }
+  busy(true);
+  $("commentary").textContent = "Recording…";
+  try {
+    const data = await fetchVoice(text);
+    if (!data) return;
+    const bin = atob(data.audioBase64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const blob = new Blob([bytes], { type: data.mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "tonecast-" + $("persona").value + "-" + $("source").value + ".mp3";
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    $("commentary").textContent = "Voice note (" + $("source").value + ") downloaded — attach it to your email.";
+  } catch (e) { $("commentary").textContent = "Error: " + e.message; }
+  finally { busy(false); }
+});
+
+$("restore").addEventListener("click", () => {
+  if (!original) { $("commentary").textContent = "Nothing to restore."; return; }
+  $("result").value = original;
+  $("subject").textContent = "";
+  $("commentary").textContent = "Restored original draft.";
+});
+
+loadPersonas().catch((e) => ($("commentary").textContent = "Failed to load: " + e.message));
+</script>
+</body>
+</html>
