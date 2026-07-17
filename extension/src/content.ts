@@ -74,7 +74,7 @@ function mountPanel(composeView: ComposeView) {
 
   // Mount into a compose status bar: a non-editable region BELOW the body,
   // so the text input stays on top and native <select> dropdowns work.
-  const statusBar = composeView.addStatusBar({ height: 380 });
+  const statusBar = composeView.addStatusBar({ height: 175 });
 
   const panel = document.createElement("section");
   panel.className = PANEL_CLASS;
