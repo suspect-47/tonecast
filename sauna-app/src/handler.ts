@@ -181,12 +181,16 @@ export default {
 
     if (path === "/api/voice" && request.method === "POST") {
       try {
-        const body = (await request.json()) as { text?: string; personaId?: string };
+        const body = (await request.json()) as { text?: string; personaId?: string; gender?: string };
         if (!body.text || !body.text.trim()) return json({ error: "Text is required" }, 400);
+        // Gender override wins; otherwise use the persona's voice; otherwise a default.
+        const GENDER_VOICES: Record<string, string> = {
+          male: "s3TPKV1kjDlVtZbl4Ksh", // Adam
+          female: "hpp4J3VqNfWAUOO0d1Us", // Bella
+        };
         const voiceId =
-          body.personaId && isPersonaId(body.personaId)
-            ? personaMap.get(body.personaId)!.voiceId
-            : "ys3XeJJA4ArWMhRpcX1D";
+          (body.gender && GENDER_VOICES[body.gender]) ||
+          (body.personaId && isPersonaId(body.personaId) ? personaMap.get(body.personaId)!.voiceId : "ys3XeJJA4ArWMhRpcX1D");
         const result = await synthesizeVoice(body.text.trim(), voiceId);
         return json(result);
       } catch (error) {

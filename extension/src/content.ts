@@ -58,6 +58,17 @@ const personaOptions: Persona[] = [
   { id: "standup_genz", label: "Standup: Gen Z", description: "Absurdist, chronically-online deadpan." }
 ];
 
+const voiceOptions = [
+  { value: "", label: "Persona voice" },
+  { value: "male", label: "Male voice" },
+  { value: "female", label: "Female voice" }
+];
+
+const sourceOptions = [
+  { value: "possessed", label: "Possessed version" },
+  { value: "original", label: "Original draft" }
+];
+
 void InboxSDK.load(2, INBOXSDK_APP_ID).then((sdk: any) => {
   sdk.Compose.registerComposeViewHandler((composeView: ComposeView) => {
     mountPanel(composeView);
@@ -65,6 +76,28 @@ void InboxSDK.load(2, INBOXSDK_APP_ID).then((sdk: any) => {
 }).catch((error: unknown) => {
   console.error("[ToneCast] InboxSDK failed to load", error);
 });
+
+function makeSelect(options: { value: string; label: string }[]): HTMLSelectElement {
+  const select = document.createElement("select");
+  select.className = "tonecast-select";
+  for (const opt of options) {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    select.append(o);
+  }
+  return select;
+}
+
+function makeField(labelText: string, control: HTMLElement): { field: HTMLElement; label: HTMLElement } {
+  const field = document.createElement("div");
+  field.className = "tonecast-field";
+  const label = document.createElement("label");
+  label.className = "tonecast-fieldlabel";
+  label.textContent = labelText;
+  field.append(label, control);
+  return { field, label };
+}
 
 function mountPanel(composeView: ComposeView) {
   // Pre-possession state, preserved with formatting for a clean exorcise.
@@ -75,7 +108,7 @@ function mountPanel(composeView: ComposeView) {
 
   // Mount into a compose status bar: a non-editable region BELOW the body,
   // so the text input stays on top and native <select> dropdowns work.
-  const statusBar = composeView.addStatusBar({ height: 175 });
+  const statusBar = composeView.addStatusBar({ height: 205 });
 
   const panel = document.createElement("section");
   panel.className = PANEL_CLASS;
@@ -84,22 +117,9 @@ function mountPanel(composeView: ComposeView) {
   title.className = "tonecast-heading";
   title.textContent = "ToneCast";
 
-  const personaSelect = document.createElement("select");
-  personaSelect.className = "tonecast-select";
-  for (const persona of personaOptions) {
-    const option = document.createElement("option");
-    option.value = persona.id;
-    option.textContent = persona.label;
-    personaSelect.append(option);
-  }
-
-  const intensityLabel = document.createElement("label");
-  intensityLabel.className = "tonecast-intensity";
-  intensityLabel.textContent = "Intensity";
-
-  const intensityValue = document.createElement("span");
-  intensityValue.textContent = "65";
-  intensityLabel.append(` `, intensityValue);
+  const personaSelect = makeSelect(personaOptions.map((p) => ({ value: p.id, label: p.label })));
+  const genderSelect = makeSelect(voiceOptions);
+  const voiceSourceSelect = makeSelect(sourceOptions);
 
   const intensityInput = document.createElement("input");
   intensityInput.type = "range";
@@ -107,25 +127,18 @@ function mountPanel(composeView: ComposeView) {
   intensityInput.max = "100";
   intensityInput.value = "65";
   intensityInput.className = "tonecast-range";
+
+  const { field: personaField } = makeField("Persona", personaSelect);
+  const { field: voiceField } = makeField("Voice", genderSelect);
+  const { field: sourceField } = makeField("Voice of", voiceSourceSelect);
+  const { field: intensityField, label: intensityLabel } = makeField("Intensity 65", intensityInput);
   intensityInput.addEventListener("input", () => {
-    intensityValue.textContent = intensityInput.value;
+    intensityLabel.textContent = `Intensity ${intensityInput.value}`;
   });
 
-  const sourceLabel = document.createElement("label");
-  sourceLabel.className = "tonecast-intensity";
-  sourceLabel.textContent = "Voice of";
-
-  const voiceSourceSelect = document.createElement("select");
-  voiceSourceSelect.className = "tonecast-select";
-  for (const opt of [
-    { value: "possessed", label: "Possessed version" },
-    { value: "original", label: "Original draft" }
-  ]) {
-    const o = document.createElement("option");
-    o.value = opt.value;
-    o.textContent = opt.label;
-    voiceSourceSelect.append(o);
-  }
+  const grid = document.createElement("div");
+  grid.className = "tonecast-grid";
+  grid.append(personaField, voiceField, sourceField, intensityField);
 
   const commentary = document.createElement("p");
   commentary.className = "tonecast-commentary";
@@ -143,7 +156,7 @@ function mountPanel(composeView: ComposeView) {
   const possessButton = createButton("Possess");
   const exorciseButton = createButton("Exorcise");
   const playVoiceButton = createButton("Play Voice");
-  const attachVoiceButton = createButton("Attach Voice Note");
+  const attachVoiceButton = createButton("Attach Note");
 
   possessButton.addEventListener("click", async () => {
     setBusy(panel, true);
@@ -189,7 +202,7 @@ function mountPanel(composeView: ComposeView) {
         return;
       }
       commentary.textContent = "Performing…";
-      const audio = await fetchVoice(text, personaSelect.value, commentary);
+      const audio = await fetchVoice(text, personaSelect.value, genderSelect.value, commentary);
       if (!audio) return;
       stopVoice(); // cancel any lingering playback before starting a new clip
       const el = new Audio(`data:${audio.mimeType};base64,${audio.audioBase64}`);
@@ -215,16 +228,7 @@ function mountPanel(composeView: ComposeView) {
   });
 
   controls.append(possessButton, exorciseButton, playVoiceButton, attachVoiceButton);
-  panel.append(
-    title,
-    personaSelect,
-    intensityLabel,
-    intensityInput,
-    sourceLabel,
-    voiceSourceSelect,
-    controls,
-    commentary
-  );
+  panel.append(title, grid, controls, commentary);
   statusBar.el.append(panel);
 
   async function possessDraft() {
@@ -283,7 +287,7 @@ function mountPanel(composeView: ComposeView) {
     }
 
     commentary.textContent = "Recording voice note…";
-    const audio = await fetchVoice(text, personaSelect.value, commentary);
+    const audio = await fetchVoice(text, personaSelect.value, genderSelect.value, commentary);
     if (!audio) return;
 
     const blob = base64ToBlob(audio.audioBase64, audio.mimeType);
@@ -312,13 +316,14 @@ function createButton(label: string): HTMLButtonElement {
 async function fetchVoice(
   text: string,
   personaId: string,
+  gender: string,
   commentary: HTMLElement
 ): Promise<{ audioBase64: string; mimeType: string } | null> {
   const backendBaseUrl = await getBackendBaseUrl();
   const response = await fetch(`${backendBaseUrl}/api/voice`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, personaId })
+    body: JSON.stringify({ text, personaId, gender })
   });
 
   const data = (await response.json()) as

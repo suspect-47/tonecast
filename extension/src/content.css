@@ -1,10 +1,8 @@
 .tonecast-panel {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   margin: 6px 8px;
   padding: 10px;
-  max-height: 150px;
-  overflow-y: auto;
   border-radius: 12px;
   border: 1px solid rgba(15, 23, 42, 0.14);
   background:
@@ -27,6 +25,27 @@
   color: #7c2d12;
 }
 
+.tonecast-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 10px;
+}
+
+.tonecast-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.tonecast-fieldlabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #7c2d12;
+}
+
 .tonecast-select {
   width: 100%;
   padding: 5px 8px;
@@ -37,37 +56,27 @@
   color: #1f2937;
 }
 
-.tonecast-intensity {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #7c2d12;
-}
-
 .tonecast-range {
   width: 100%;
+  margin-top: 8px;
   accent-color: #ea580c;
 }
 
 .tonecast-controls {
   display: flex;
-  flex-wrap: wrap;
   gap: 6px;
 }
 
 .tonecast-button {
-  flex: 1 1 auto;
-  min-width: 110px;
+  flex: 1 1 0;
+  min-width: 0;
   cursor: pointer;
   border: none;
   border-radius: 8px;
-  padding: 7px 10px;
+  padding: 8px 6px;
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
   color: #fff;
   background: linear-gradient(135deg, #f97316, #ea580c);
 }
