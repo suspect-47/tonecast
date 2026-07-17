@@ -21,17 +21,12 @@ export type PersonaConfig = {
   uiTheme: string;
   sendLabel: string;
   animation: Animation;
-  // ElevenLabs voice used when performing this persona aloud.
+  // ElevenLabs voices: default (persona flavor) + a male and female cast so the
+  // "Voice" toggle keeps each persona distinct (a male Gen Z != a male Gen X).
   voiceId: string;
+  maleVoiceId: string;
+  femaleVoiceId: string;
 };
-
-// Known Sauna workspace voices (see elevenlabs skill).
-const VOICE = {
-  saunaMain: "ys3XeJJA4ArWMhRpcX1D",
-  david: "jvcMcno3QtjOzGtfpjoI",
-  edward: "goT3UYdM9bhm0n2lmKQx",
-  matthew: "8JVbfL6oEdmuxKn5DK2C",
-} as const;
 
 export const personas: PersonaConfig[] = [
   {
@@ -41,7 +36,9 @@ export const personas: PersonaConfig[] = [
     uiTheme: "trailer-fire",
     sendLabel: "Release the Trailer",
     animation: "glow",
-    voiceId: VOICE.david,
+    voiceId: "AQ6yxtsTonfHLHY2zUcO", // Todd - deep, bold
+    maleVoiceId: "AQ6yxtsTonfHLHY2zUcO", // Todd
+    femaleVoiceId: "Pid5DJleNF2sxsuF6YKD", // Aneta Nova - confident
   },
   {
     id: "furious_chef",
@@ -50,7 +47,9 @@ export const personas: PersonaConfig[] = [
     uiTheme: "kitchen-heat",
     sendLabel: "Serve the Verdict",
     animation: "shake",
-    voiceId: VOICE.matthew,
+    voiceId: "SOYHLrjzK2X1ezoPC6cr", // Harry - rough
+    maleVoiceId: "SOYHLrjzK2X1ezoPC6cr", // Harry
+    femaleVoiceId: "FGY2WhTYpPnrIDTdsKH5", // Laura - sassy
   },
   {
     id: "ancient_wizard",
@@ -59,7 +58,9 @@ export const personas: PersonaConfig[] = [
     uiTheme: "arcane-mist",
     sendLabel: "Deliver the Prophecy",
     animation: "smoke",
-    voiceId: VOICE.edward,
+    voiceId: "JoYo65swyP8hH6fVMeTO", // Old Wizard
+    maleVoiceId: "JoYo65swyP8hH6fVMeTO", // Old Wizard
+    femaleVoiceId: "KHCvMklQZZo0O30ERnVn", // Sara Martin - wise
   },
   {
     id: "pirate_captain",
@@ -68,7 +69,9 @@ export const personas: PersonaConfig[] = [
     uiTheme: "storm-sea",
     sendLabel: "Send to the Seven Seas",
     animation: "wave",
-    voiceId: VOICE.matthew,
+    voiceId: "N2lVS1w4EtoT3dr4eOWO", // Callum - husky trickster
+    maleVoiceId: "N2lVS1w4EtoT3dr4eOWO", // Callum
+    femaleVoiceId: "Rpg8Sn3cVL1f8658yYm2", // Pauline - aussie character
   },
   {
     id: "sports_commentator",
@@ -77,7 +80,9 @@ export const personas: PersonaConfig[] = [
     uiTheme: "arena-lights",
     sendLabel: "Broadcast the Play",
     animation: "pulse",
-    voiceId: VOICE.matthew,
+    voiceId: "TX3LPaxmHKxFdv7VOQHJ", // Liam - energetic
+    maleVoiceId: "TX3LPaxmHKxFdv7VOQHJ", // Liam
+    femaleVoiceId: "tnSpp4vdxKPjI9w0GnoV", // Hope - upbeat
   },
   {
     id: "noir_detective",
@@ -86,7 +91,9 @@ export const personas: PersonaConfig[] = [
     uiTheme: "noir-shadow",
     sendLabel: "Close the Case",
     animation: "smoke",
-    voiceId: VOICE.edward,
+    voiceId: "EkK5I93UQWFDigLMpZcX", // James - husky, deep
+    maleVoiceId: "EkK5I93UQWFDigLMpZcX", // James
+    femaleVoiceId: "SaqYcK3ZpDKBAImA8AdW", // Jane Doe - intimate
   },
   {
     id: "shakespearean_bard",
@@ -95,7 +102,9 @@ export const personas: PersonaConfig[] = [
     uiTheme: "velvet-stage",
     sendLabel: "Perform the Verse",
     animation: "glow",
-    voiceId: VOICE.david,
+    voiceId: "JBFqnCBsd6RMkjVDRZzb", // George - british, warm
+    maleVoiceId: "JBFqnCBsd6RMkjVDRZzb", // George
+    femaleVoiceId: "Xb7hH8MSUJpSbSDYk0k2", // Alice - british
   },
   {
     id: "gen_z_hype",
@@ -104,7 +113,9 @@ export const personas: PersonaConfig[] = [
     uiTheme: "neon-pop",
     sendLabel: "Post It fr fr",
     animation: "pulse",
-    voiceId: VOICE.saunaMain,
+    voiceId: "IKne3meq5aSn9XLyUdCD", // Charlie - hyped
+    maleVoiceId: "IKne3meq5aSn9XLyUdCD", // Charlie
+    femaleVoiceId: "jqcCZkN6Knx8BJ5TBdYR", // Zara - confident social
   },
   {
     id: "zen_master",
@@ -113,7 +124,9 @@ export const personas: PersonaConfig[] = [
     uiTheme: "still-water",
     sendLabel: "Release with Peace",
     animation: "wave",
-    voiceId: VOICE.matthew,
+    voiceId: "NFG5qt843uXKj4pFvR7C", // Adam Stone - meditative
+    maleVoiceId: "NFG5qt843uXKj4pFvR7C", // Adam Stone
+    femaleVoiceId: "iCrDUkL56s3C8sCRl7wb", // Hope - soothing
   },
   {
     id: "standup_genx",
@@ -122,7 +135,9 @@ export const personas: PersonaConfig[] = [
     uiTheme: "grunge-club",
     sendLabel: "Drop the Set",
     animation: "pulse",
-    voiceId: VOICE.matthew,
+    voiceId: "CwhRBWXzGAHq8TQ4Fs17", // Roger - laid-back, middle-aged
+    maleVoiceId: "CwhRBWXzGAHq8TQ4Fs17", // Roger
+    femaleVoiceId: "56AoDkrOh6qfVPDXZ7Pt", // Cassidy - confident, middle-aged
   },
   {
     id: "standup_geny",
@@ -131,7 +146,9 @@ export const personas: PersonaConfig[] = [
     uiTheme: "open-mic",
     sendLabel: "Land the Bit",
     animation: "glow",
-    voiceId: VOICE.edward,
+    voiceId: "bIHbv24MWmeRgasZH58o", // Will - young, relaxed optimist
+    maleVoiceId: "bIHbv24MWmeRgasZH58o", // Will
+    femaleVoiceId: "EXAVITQu4vr4xnSDxMaL", // Sarah - young, reassuring
   },
   {
     id: "standup_genz",
@@ -140,7 +157,9 @@ export const personas: PersonaConfig[] = [
     uiTheme: "brainrot",
     sendLabel: "Send, no cap",
     animation: "shake",
-    voiceId: VOICE.saunaMain,
+    voiceId: "9F4C8ztpNUmXkdDDbz3J", // Dan Dan - young, excited
+    maleVoiceId: "9F4C8ztpNUmXkdDDbz3J", // Dan Dan
+    femaleVoiceId: "6u6JbqKdaQy89ENzLSju", // Brielle - young, chill podcast
   },
 ];
 
