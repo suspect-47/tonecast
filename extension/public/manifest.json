@@ -3,10 +3,13 @@
   "name": "ToneCast",
   "version": "0.1.0",
   "description": "Possessed Gmail drafts with personas, theatrics, and voice playback.",
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
   "host_permissions": [
     "https://mail.google.com/*",
-    "http://localhost:8787/*"
+    "http://localhost:8787/*",
+    "https://tonecast-4vqtt7s5.sauna.new/*"
   ],
   "background": {
     "service_worker": "background.js",
@@ -14,9 +17,15 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://mail.google.com/*"],
-      "js": ["content.js"],
-      "css": ["content.css"],
+      "matches": [
+        "https://mail.google.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
       "run_at": "document_idle"
     }
   ]

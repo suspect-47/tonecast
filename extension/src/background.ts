@@ -1,5 +1,5 @@
 const defaults = {
-  backendBaseUrl: "http://localhost:8787"
+  backendBaseUrl: "https://tonecast-4vqtt7s5.sauna.new"
 };
 
 chrome.runtime.onInstalled.addListener(() => {

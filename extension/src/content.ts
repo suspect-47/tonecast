@@ -49,6 +49,41 @@ const personaOptions: Persona[] = [
     id: "sports_commentator",
     label: "Sports Commentator",
     description: "Status updates narrated like a final."
+  },
+  {
+    id: "noir_detective",
+    label: "Noir Detective",
+    description: "Every calendar invite hides a case."
+  },
+  {
+    id: "shakespearean_bard",
+    label: "Shakespearean Bard",
+    description: "Iambic grandeur for petty updates."
+  },
+  {
+    id: "gen_z_hype",
+    label: "Gen Z Hype",
+    description: "It's giving corporate, but slay."
+  },
+  {
+    id: "zen_master",
+    label: "Zen Master",
+    description: "Dissolves urgency into calm clarity."
+  },
+  {
+    id: "standup_genx",
+    label: "Standup: Gen X",
+    description: "Deadpan, cynical mic work — 90s callbacks, whatever."
+  },
+  {
+    id: "standup_geny",
+    label: "Standup: Millennial",
+    description: "Self-deprecating burnout comedy about adulting."
+  },
+  {
+    id: "standup_genz",
+    label: "Standup: Gen Z",
+    description: "Absurdist, chronically-online deadpan."
   }
 ];
 
@@ -129,12 +164,29 @@ function mountPanel(composeBody: HTMLElement) {
     commentary.textContent = selected?.description ?? "";
   });
 
+  const sourceLabel = document.createElement("label");
+  sourceLabel.className = "tonecast-intensity";
+  sourceLabel.textContent = "Voice of";
+
+  const voiceSourceSelect = document.createElement("select");
+  voiceSourceSelect.className = "tonecast-select";
+  for (const opt of [
+    { value: "possessed", label: "Possessed version" },
+    { value: "original", label: "Original draft" }
+  ]) {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.label;
+    voiceSourceSelect.append(o);
+  }
+
   const controls = document.createElement("div");
   controls.className = "tonecast-controls";
 
   const possessButton = createButton("Possess");
   const exorciseButton = createButton("Exorcise");
   const playVoiceButton = createButton("Play Voice");
+  const attachVoiceButton = createButton("Attach Voice Note");
 
   possessButton.addEventListener("click", async () => {
     setBusy(panel, true);
@@ -159,14 +211,32 @@ function mountPanel(composeBody: HTMLElement) {
   playVoiceButton.addEventListener("click", async () => {
     setBusy(panel, true);
     try {
-      await playVoice(composeBody, commentary);
+      await playVoice(composeBody, commentary, personaSelect.value, voiceSourceSelect.value);
     } finally {
       setBusy(panel, false);
     }
   });
 
-  controls.append(possessButton, exorciseButton, playVoiceButton);
-  panel.append(title, personaSelect, intensityLabel, intensityInput, controls, commentary);
+  attachVoiceButton.addEventListener("click", async () => {
+    setBusy(panel, true);
+    try {
+      await attachVoiceNote(composeBody, commentary, personaSelect.value, voiceSourceSelect.value);
+    } finally {
+      setBusy(panel, false);
+    }
+  });
+
+  controls.append(possessButton, exorciseButton, playVoiceButton, attachVoiceButton);
+  panel.append(
+    title,
+    personaSelect,
+    intensityLabel,
+    intensityInput,
+    sourceLabel,
+    voiceSourceSelect,
+    controls,
+    commentary
+  );
   container.insertBefore(panel, container.firstChild);
 }
 
@@ -238,19 +308,39 @@ function restoreDraft(composeBody: HTMLElement, commentary: HTMLElement) {
   commentary.textContent = "Draft restored to its pre-possession state.";
 }
 
-async function playVoice(composeBody: HTMLElement, commentary: HTMLElement) {
-  const text = getComposeText(composeBody).trim();
+async function playVoice(
+  composeBody: HTMLElement,
+  commentary: HTMLElement,
+  personaId: string,
+  source: string
+) {
+  const text = getVoiceText(composeBody, source);
 
   if (!text) {
-    commentary.textContent = "No possessed monologue available to perform.";
+    commentary.textContent = "Nothing to perform yet.";
     return;
   }
 
+  commentary.textContent = "Performing…";
+  const audio = await fetchVoice(text, personaId, commentary);
+  if (!audio) return;
+
+  const el = new Audio(`data:${audio.mimeType};base64,${audio.audioBase64}`);
+  el.play().catch(() => {
+    commentary.textContent = "Browser blocked playback. Interact with Gmail and try again.";
+  });
+}
+
+async function fetchVoice(
+  text: string,
+  personaId: string,
+  commentary: HTMLElement
+): Promise<{ audioBase64: string; mimeType: string } | null> {
   const backendBaseUrl = await getBackendBaseUrl();
   const response = await fetch(`${backendBaseUrl}/api/voice`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text })
+    body: JSON.stringify({ text, personaId })
   });
 
   const data = (await response.json()) as
@@ -258,14 +348,84 @@ async function playVoice(composeBody: HTMLElement, commentary: HTMLElement) {
     | { error: string };
 
   if (!response.ok || "error" in data) {
-    commentary.textContent = "Voice playback failed. Verify ElevenLabs credentials.";
+    commentary.textContent = "Voice generation failed. Try again.";
+    return null;
+  }
+
+  return data;
+}
+
+function getVoiceText(composeBody: HTMLElement, source: string): string {
+  if (source === "original") {
+    const original = composeBody.dataset[ORIGIN_DATA_KEY];
+    return (original ?? getComposeText(composeBody)).trim();
+  }
+  return getComposeText(composeBody).trim();
+}
+
+function base64ToBlob(base64: string, mimeType: string): Blob {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new Blob([bytes], { type: mimeType });
+}
+
+async function attachVoiceNote(
+  composeBody: HTMLElement,
+  commentary: HTMLElement,
+  personaId: string,
+  source: string
+) {
+  const text = getVoiceText(composeBody, source);
+
+  if (!text) {
+    commentary.textContent = "Nothing to voice yet.";
     return;
   }
 
-  const audio = new Audio(`data:${data.mimeType};base64,${data.audioBase64}`);
-  audio.play().catch(() => {
-    commentary.textContent = "Browser blocked playback. Interact with Gmail and try again.";
-  });
+  commentary.textContent = "Recording voice note…";
+  const audio = await fetchVoice(text, personaId, commentary);
+  if (!audio) return;
+
+  const blob = base64ToBlob(audio.audioBase64, audio.mimeType);
+  const fileName = `tonecast-${personaId}-${source}.mp3`;
+  const file = new File([blob], fileName, { type: audio.mimeType });
+
+  const dialog = composeBody.closest("div[role='dialog']") ?? composeBody;
+  const dropTarget =
+    (dialog.querySelector("div[aria-label='Message Body']") as HTMLElement | null) ?? composeBody;
+
+  let attached = false;
+  try {
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    for (const type of ["dragenter", "dragover", "drop"] as const) {
+      dropTarget.dispatchEvent(
+        new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer })
+      );
+    }
+    attached = true;
+  } catch {
+    attached = false;
+  }
+
+  downloadBlob(blob, fileName);
+  commentary.textContent = attached
+    ? `Voice note (${source}) dropped into the draft — also saved to Downloads as a backup.`
+    : `Voice note (${source}) saved to Downloads — drag it into your email to attach.`;
+}
+
+function downloadBlob(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
 function getComposeText(composeBody: HTMLElement): string {
@@ -334,8 +494,8 @@ function clearTheme(panel: HTMLElement) {
 }
 
 async function getBackendBaseUrl(): Promise<string> {
-  const stored = await chrome.storage.sync.get({ backendBaseUrl: "http://localhost:8787" });
+  const stored = await chrome.storage.sync.get({ backendBaseUrl: "https://tonecast-4vqtt7s5.sauna.new" });
   return typeof stored.backendBaseUrl === "string"
     ? stored.backendBaseUrl
-    : "http://localhost:8787";
+    : "https://tonecast-4vqtt7s5.sauna.new";
 }
