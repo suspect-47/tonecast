@@ -71,6 +71,7 @@ function mountPanel(composeView: ComposeView) {
   let originalHtml: string | null = null;
   let originalText: string | null = null;
   let originalSubject: string | null = null;
+  let currentAudio: HTMLAudioElement | null = null;
 
   // Mount into a compose status bar: a non-editable region BELOW the body,
   // so the text input stays on top and native <select> dropdowns work.
@@ -131,6 +132,7 @@ function mountPanel(composeView: ComposeView) {
   commentary.textContent = personaOptions[0]?.description ?? "";
 
   personaSelect.addEventListener("change", () => {
+    stopVoice();
     const selected = personaOptions.find((persona) => persona.id === personaSelect.value);
     commentary.textContent = selected?.description ?? "";
   });
@@ -163,7 +165,22 @@ function mountPanel(composeView: ComposeView) {
     clearTheme(panel);
   });
 
+  function stopVoice() {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      currentAudio = null;
+    }
+    playVoiceButton.textContent = "Play Voice";
+  }
+
   playVoiceButton.addEventListener("click", async () => {
+    // Toggle: if a clip is playing, this click stops it.
+    if (currentAudio) {
+      stopVoice();
+      commentary.textContent = "Playback stopped.";
+      return;
+    }
     setBusy(panel, true);
     try {
       const text = getVoiceText(voiceSourceSelect.value);
@@ -174,8 +191,13 @@ function mountPanel(composeView: ComposeView) {
       commentary.textContent = "Performing…";
       const audio = await fetchVoice(text, personaSelect.value, commentary);
       if (!audio) return;
+      stopVoice(); // cancel any lingering playback before starting a new clip
       const el = new Audio(`data:${audio.mimeType};base64,${audio.audioBase64}`);
+      currentAudio = el;
+      playVoiceButton.textContent = "Stop";
+      el.addEventListener("ended", () => stopVoice());
       el.play().catch(() => {
+        stopVoice();
         commentary.textContent = "Browser blocked playback. Click in Gmail and try again.";
       });
     } finally {
