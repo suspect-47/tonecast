@@ -1,17 +1,25 @@
 import * as InboxSDK from "@inboxsdk/core";
 
 // Register a free app id at https://www.inboxsdk.com/register and replace this.
-// InboxSDK needs a valid `sdk_...` id to initialize against Gmail.
+// InboxSDK also initializes with a dev id (shows a small warning banner in Gmail).
 const INBOXSDK_APP_ID = "sdk_tonecast_PLACEHOLDER";
+
+interface StatusBarView {
+  el: HTMLElement;
+  destroy(): void;
+  setHeight(newHeight: number): void;
+}
 
 // Minimal shape of the InboxSDK ComposeView surface we use.
 interface ComposeView {
   getTextContent(): string;
+  getHTMLContent(): string;
   getSubjectInput(): HTMLInputElement | null;
   setSubject(text: string): void;
   setBodyText(text: string): void;
-  getBodyElement(): HTMLElement;
+  setBodyHTML(html: string): void;
   attachFiles(files: Blob[]): void;
+  addStatusBar(opts?: { height?: number; orderHint?: number; addAboveNativeStatusBar?: boolean }): StatusBarView;
 }
 
 type Persona = {
@@ -59,16 +67,14 @@ void InboxSDK.load(2, INBOXSDK_APP_ID).then((sdk: any) => {
 });
 
 function mountPanel(composeView: ComposeView) {
-  const body = composeView.getBodyElement();
-  const container = body.parentElement;
-
-  if (!container || container.querySelector(`.${PANEL_CLASS}`)) {
-    return;
-  }
-
-  // Per-compose memory of the pre-possession state.
-  let originalDraft: string | null = null;
+  // Pre-possession state, preserved with formatting for a clean exorcise.
+  let originalHtml: string | null = null;
+  let originalText: string | null = null;
   let originalSubject: string | null = null;
+
+  // Mount into a compose status bar: a non-editable region BELOW the body,
+  // so the text input stays on top and native <select> dropdowns work.
+  const statusBar = composeView.addStatusBar({ height: 380 });
 
   const panel = document.createElement("section");
   panel.className = PANEL_CLASS;
@@ -147,13 +153,13 @@ function mountPanel(composeView: ComposeView) {
   });
 
   exorciseButton.addEventListener("click", () => {
-    if (originalDraft === null) {
+    if (originalHtml === null) {
       commentary.textContent = "Nothing to exorcise yet.";
       return;
     }
-    composeView.setBodyText(originalDraft);
+    composeView.setBodyHTML(originalHtml);
     if (originalSubject !== null) composeView.setSubject(originalSubject);
-    commentary.textContent = "Draft restored to its pre-possession state.";
+    commentary.textContent = "Draft restored with its original formatting.";
     clearTheme(panel);
   });
 
@@ -197,7 +203,7 @@ function mountPanel(composeView: ComposeView) {
     controls,
     commentary
   );
-  container.insertBefore(panel, body);
+  statusBar.el.append(panel);
 
   async function possessDraft() {
     const draft = composeView.getTextContent().trim();
@@ -207,8 +213,9 @@ function mountPanel(composeView: ComposeView) {
       return;
     }
 
-    if (originalDraft === null) {
-      originalDraft = draft;
+    if (originalHtml === null) {
+      originalHtml = composeView.getHTMLContent();
+      originalText = draft;
       originalSubject = composeView.getSubjectInput()?.value ?? "";
     }
 
@@ -239,7 +246,7 @@ function mountPanel(composeView: ComposeView) {
 
   function getVoiceText(source: string): string {
     if (source === "original") {
-      return (originalDraft ?? composeView.getTextContent()).trim();
+      return (originalText ?? composeView.getTextContent()).trim();
     }
     return composeView.getTextContent().trim();
   }
